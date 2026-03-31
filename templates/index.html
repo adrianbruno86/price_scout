@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Price Scout Bot</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0f12;--s1:#161920;--s2:#1e2229;--bd:#2a2f3a;--tx:#e8eaf0;--mu:#7a8199;--ac:#4f8ef7;--ac2:#6ee7b7;--danger:#f87171;--warn:#fbbf24;--purple:#a78bfa;--r:10px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Space Grotesk',system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;}
+
+.header{border-bottom:1px solid var(--bd);padding:0 1.5rem;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:100;}
+.logo{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;letter-spacing:-.02em;}
+.logo-icon{width:26px;height:26px;background:var(--ac);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.hdr-right{display:flex;align-items:center;gap:14px;}
+.status{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--mu);}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--ac2);box-shadow:0 0 5px var(--ac2);}
+.about-link{font-size:12px;color:var(--mu);text-decoration:none;padding:4px 10px;border:1px solid var(--bd);border-radius:6px;transition:all .15s;}
+.about-link:hover{color:var(--tx);border-color:var(--ac);}
+
+.tabs{display:flex;border-bottom:1px solid var(--bd);padding:0 1.5rem;background:var(--bg);overflow-x:auto;}
+.tab{padding:9px 18px;font-size:13px;font-weight:500;color:var(--mu);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;white-space:nowrap;font-family:inherit;}
+.tab.active{color:var(--ac);border-bottom-color:var(--ac);}
+.tab:hover:not(.active){color:var(--tx);}
+
+.page{display:none;}
+.page.active{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 91px);}
+.page.full{display:block!important;}
+@media(max-width:820px){.page.active{grid-template-columns:1fr;}}
+
+.sb{border-right:1px solid var(--bd);padding:1.1rem;overflow-y:auto;max-height:calc(100vh - 91px);position:sticky;top:91px;}
+.sblabel{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--mu);margin-bottom:.5rem;display:block;}
+.sb-sec{margin-bottom:1.1rem;}
+
+.field{margin-bottom:.75rem;}
+.field label{display:block;font-size:11px;color:var(--mu);margin-bottom:3px;}
+input[type="text"],input[type="number"],select{width:100%;padding:6px 8px;background:var(--s2);border:1px solid var(--bd);border-radius:7px;color:var(--tx);font-size:12px;font-family:inherit;transition:border-color .15s;}
+input:focus,select:focus{outline:none;border-color:var(--ac);}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+
+.sbtn{width:100%;padding:8px;background:var(--ac);color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s;}
+.sbtn:hover{opacity:.85;} .sbtn:disabled{opacity:.4;cursor:not-allowed;}
+.sbtn.secondary{background:transparent;border:1px solid var(--bd);color:var(--mu);}
+.sbtn.secondary:hover{border-color:var(--ac);color:var(--tx);}
+
+.divider{border:none;border-top:1px solid var(--bd);margin:.85rem 0;}
+.chips{display:flex;flex-wrap:wrap;gap:4px;}
+.chip{padding:3px 8px;border-radius:99px;font-size:11px;font-weight:500;border:1px solid var(--bd);cursor:pointer;background:var(--s2);color:var(--mu);transition:all .15s;user-select:none;}
+.chip.on{background:rgba(79,142,247,.15);color:var(--ac);border-color:var(--ac);}
+
+.ws-toggle{display:flex;align-items:flex-start;gap:8px;padding:7px 9px;background:rgba(79,142,247,.07);border:1px solid rgba(79,142,247,.2);border-radius:7px;margin-top:8px;cursor:pointer;user-select:none;}
+.ws-toggle input{accent-color:var(--ac);width:14px;height:14px;margin-top:2px;flex-shrink:0;cursor:pointer;}
+.ws-lbl{font-size:12px;color:var(--tx);line-height:1.4;}
+.ws-sub{font-size:10px;color:var(--mu);}
+
+/* MAIN */
+.main{padding:1.1rem;overflow-x:auto;}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:1.1rem;}
+@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr);}}
+.stat{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);padding:11px;}
+.stat-lbl{font-size:11px;color:var(--mu);margin-bottom:2px;}
+.stat-val{font-size:20px;font-weight:600;letter-spacing:-.03em;}
+.stat-sub{font-size:10px;color:var(--mu);margin-top:2px;}
+
+.tcard{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;}
+.thdr{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--bd);flex-wrap:wrap;gap:7px;}
+.ttitle{font-size:13px;font-weight:600;}
+.xbtns{display:flex;gap:5px;}
+.xbtn{padding:3px 10px;font-size:11px;border:1px solid var(--bd);border-radius:5px;background:transparent;color:var(--mu);cursor:pointer;font-family:inherit;transition:all .15s;}
+.xbtn:hover{background:var(--s2);color:var(--tx);}
+
+.twrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;min-width:780px;}
+th{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--mu);font-weight:500;padding:8px 11px;text-align:left;border-bottom:1px solid var(--bd);background:var(--s2);white-space:nowrap;}
+td{padding:9px 11px;font-size:12px;border-bottom:1px solid var(--bd);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--s2);}
+
+.rank{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;font-family:'IBM Plex Mono',monospace;}
+.r1{background:#2d2200;color:var(--warn);border:1px solid #4a3800;}
+.r2{background:#1f2226;color:#9ca3af;border:1px solid #374151;}
+.r3{background:#2a1a12;color:#f97316;border:1px solid #44250e;}
+.rn{background:var(--s2);color:var(--mu);border:1px solid var(--bd);}
+
+.pb{padding:2px 7px;border-radius:99px;font-size:10px;font-weight:500;white-space:nowrap;}
+.pml{background:#1a1000;color:#fcd34d;border:1px solid #3a2a00;}
+.pamz{background:#0d1a1a;color:#34d399;border:1px solid #065f46;}
+.psh{background:#1a0d14;color:#f9a8d4;border:1px solid #4a1a30;}
+.pte{background:#1a0d0d;color:#fca5a5;border:1px solid #4a1a1a;}
+.peb{background:#0d1222;color:#93c5fd;border:1px solid #1e3a6e;}
+.pal{background:#1a0d00;color:#fb923c;border:1px solid #4a2200;}
+.ptm{background:#0d1a10;color:#86efac;border:1px solid #14532d;}
+.pweb{background:#1a1022;color:#c4b5fd;border:1px solid #4c1d95;}
+
+.pname{font-weight:500;max-width:200px;line-height:1.3;font-size:12px;}
+.pcat{font-size:10px;color:var(--mu);margin-top:1px;}
+.price{font-weight:600;font-size:13px;font-family:'IBM Plex Mono',monospace;}
+.disc{font-size:10px;color:var(--danger);margin-left:3px;}
+.orig{font-size:10px;color:var(--mu);text-decoration:line-through;display:block;}
+.stars{color:var(--warn);font-size:11px;}
+.rev{font-size:10px;color:var(--mu);display:block;}
+.sn{font-weight:500;font-family:'IBM Plex Mono',monospace;font-size:12px;}
+.ss{font-size:10px;color:var(--mu);display:block;}
+.tup{color:var(--ac2);font-size:11px;} .tdn{color:var(--danger);font-size:11px;} .tst{color:var(--mu);font-size:11px;}
+.bar-wrap{display:flex;align-items:center;gap:6px;}
+.bar-bg{flex:1;height:3px;background:var(--bd);border-radius:2px;min-width:40px;}
+.bar-fg{height:3px;border-radius:2px;background:var(--ac);}
+.bar-fg.trend{background:var(--warn);}
+.score-n{font-size:11px;font-weight:600;min-width:22px;font-family:'IBM Plex Mono',monospace;}
+.ship-f{font-size:10px;color:var(--ac2);} .ship-r{font-size:10px;color:var(--ac);}
+.dq{font-size:9px;padding:1px 5px;border-radius:3px;font-weight:500;white-space:nowrap;}
+.dq-e{background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.25);}
+.dq-s{background:rgba(251,191,36,.08);color:#fbbf24;border:1px solid rgba(251,191,36,.2);}
+.link-btn{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--ac);text-decoration:none;padding:3px 7px;border:1px solid rgba(79,142,247,.3);border-radius:4px;background:rgba(79,142,247,.07);white-space:nowrap;transition:background .15s;}
+.link-btn:hover{background:rgba(79,142,247,.16);}
+.link-srch{color:var(--warn);border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.06);}
+.link-srch:hover{background:rgba(251,191,36,.14);}
+
+/* OPPORTUNITY LABELS */
+.opp-label{font-size:10px;padding:2px 7px;border-radius:99px;font-weight:500;white-space:nowrap;}
+.opp-hot{background:rgba(248,113,113,.15);color:#f87171;border:1px solid rgba(248,113,113,.3);}
+.opp-up{background:rgba(110,231,183,.1);color:#6ee7b7;border:1px solid rgba(110,231,183,.25);}
+.opp-early{background:rgba(167,139,250,.12);color:#a78bfa;border:1px solid rgba(167,139,250,.3);}
+.opp-watch{background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.25);}
+.opp-low{background:rgba(122,129,153,.1);color:var(--mu);border:1px solid var(--bd);}
+.opp-warn{background:rgba(251,191,36,.1);color:var(--warn);border:1px solid rgba(251,191,36,.3);}
+
+/* COMPARE BANNER */
+.banner{display:none;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:1rem;}
+.banner.show{display:grid;}
+@media(max-width:580px){.banner{grid-template-columns:1fr;}}
+.bcard{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);padding:11px 13px;}
+.bcard.hl{border-color:rgba(110,231,183,.35);background:rgba(110,231,183,.05);}
+.blbl{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin-bottom:3px;}
+.bval{font-size:18px;font-weight:600;letter-spacing:-.02em;}
+.bsub{font-size:10px;color:var(--mu);margin-top:2px;}
+
+/* OPPORTUNITIES SECTION */
+.opp-header{max-width:100%;padding:1.5rem 1.5rem 0;}
+.opp-grid-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:1rem;}
+@media(max-width:600px){.opp-grid-stats{grid-template-columns:repeat(2,1fr);}}
+
+/* SCORE BREAKDOWN TOOLTIP */
+.score-breakdown{font-size:10px;color:var(--mu);margin-top:2px;display:none;}
+tr:hover .score-breakdown{display:block;}
+
+/* ABOUT PAGE (iframe-less, full section) */
+.about-wrap{max-width:820px;margin:0 auto;padding:2rem 1.5rem;}
+.about-hero{text-align:center;padding:2rem 0 2.5rem;}
+.about-hero h1{font-size:1.8rem;font-weight:700;letter-spacing:-.03em;margin-bottom:.75rem;}
+.about-hero h1 span{color:var(--ac);}
+.about-hero p{color:var(--mu);font-size:1rem;max-width:560px;margin:0 auto;}
+.about-section{margin-bottom:2.5rem;}
+.about-badge{display:inline-block;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--ac);background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.2);padding:2px 9px;border-radius:4px;margin-bottom:.6rem;}
+.about-section h2{font-size:1.1rem;font-weight:600;letter-spacing:-.02em;margin-bottom:.6rem;}
+.about-section p{color:var(--mu);font-size:13px;line-height:1.75;margin-bottom:.5rem;}
+.about-feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:.9rem;}
+@media(max-width:600px){.about-feat-grid{grid-template-columns:1fr;}}
+.afeat{background:var(--s1);border:1px solid var(--bd);border-radius:9px;padding:1rem;}
+.afeat-icon{font-size:1.2rem;margin-bottom:.4rem;}
+.afeat-title{font-size:13px;font-weight:600;margin-bottom:.25rem;}
+.afeat-desc{font-size:12px;color:var(--mu);line-height:1.5;}
+.formula-box{background:var(--s2);border:1px solid var(--bd);border-radius:9px;padding:1rem;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.9;margin-top:.75rem;}
+.formula-box .c1{color:var(--ac2);} .formula-box .c2{color:var(--warn);} .formula-box .c3{color:var(--mu);}
+.limit-list{list-style:none;margin-top:.75rem;}
+.limit-list li{display:flex;gap:9px;padding:.5rem 0;border-bottom:1px solid var(--bd);font-size:13px;}
+.limit-list li:last-child{border-bottom:none;}
+.limit-list .ltx{color:var(--mu);}
+.rm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:.9rem;}
+@media(max-width:600px){.rm-grid{grid-template-columns:1fr;}}
+.rm-col{background:var(--s1);border:1px solid var(--bd);border-radius:9px;padding:.9rem;}
+.rm-head{font-size:10px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem;font-weight:600;}
+.rm-head.now{color:var(--ac2);} .rm-head.soon{color:var(--warn);} .rm-head.fut{color:var(--purple);}
+.rm-item{font-size:12px;color:var(--mu);padding:.25rem 0;border-bottom:1px solid var(--bd);}
+.rm-item:last-child{border-bottom:none;}
+.flow-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:1rem;position:relative;}
+@media(max-width:580px){.flow-row{grid-template-columns:1fr;gap:7px;}}
+.fstep{background:var(--s1);border:1px solid var(--bd);border-radius:9px;padding:.9rem;text-align:center;position:relative;}
+.fstep:not(:last-child)::after{content:'→';position:absolute;right:-12px;top:50%;transform:translateY(-50%);color:var(--mu);font-size:12px;z-index:1;}
+@media(max-width:580px){.fstep:not(:last-child)::after{content:'↓';right:auto;left:50%;top:auto;bottom:-14px;transform:translateX(-50%);}}
+.fn{width:22px;height:22px;background:var(--ac);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;margin:0 auto .4rem;}
+.ft{font-size:12px;font-weight:600;margin-bottom:.2rem;}
+.fd{font-size:11px;color:var(--mu);}
+
+/* STATE BOXES */
+.state-box{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 2rem;gap:9px;color:var(--mu);}
+.state-icon{font-size:26px;}
+.state-text{font-size:13px;text-align:center;line-height:1.6;}
+.spinner{width:24px;height:24px;border:2px solid var(--bd);border-top-color:var(--ac);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:#2a0f0f;border:1px solid #5a1a1a;color:var(--danger);padding:10px 15px;border-radius:var(--r);font-size:12px;max-width:300px;z-index:999;display:none;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo"><div class="logo-icon">🤖</div>Price Scout Bot</div>
+  <div class="hdr-right">
+    <div class="status"><div class="dot"></div>7 plataformas · scraping real</div>
+    <a href="/about" class="about-link" target="_blank">Sobre esta web ↗</a>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="sw('ranking')">📊 Ranking</div>
+  <div class="tab" onclick="sw('compare')">🔍 Producto Específico</div>
+  <div class="tab" onclick="sw('opp')">🚀 Oportunidades</div>
+  <div class="tab" onclick="sw('about')">ℹ️ Sobre esta web</div>
+</div>
+
+<!-- ══════════════════ TAB 1: RANKING ══════════════════ -->
+<div class="page active" id="page-ranking">
+  <aside class="sb">
+    <div class="sb-sec">
+      <span class="sblabel">Búsqueda</span>
+      <div class="field"><label>Producto</label><input type="text" id="r-q" placeholder="ej: parlante bluetooth…"></div>
+      <div class="field"><label>Categoría</label>
+        <select id="r-cat"><option value="">Todas</option>
+          <option>Electrónica</option><option>Ropa y moda</option><option>Hogar y jardín</option>
+          <option>Deportes</option><option>Belleza y cuidado</option><option>Juguetes</option>
+          <option>Herramientas</option><option>Libros</option><option>Automóvil</option><option>Alimentos</option>
+        </select>
+      </div>
+      <button class="sbtn" id="r-btn" onclick="doRanking()">Buscar →</button>
+    </div>
+    <hr class="divider">
+    <div class="sb-sec">
+      <span class="sblabel">Precio</span>
+      <div class="row2">
+        <div class="field"><label>Mín ($)</label><input type="number" id="r-pmin" placeholder="0" min="0"></div>
+        <div class="field"><label>Máx ($)</label><input type="number" id="r-pmax" placeholder="∞" min="0"></div>
+      </div>
+      <div class="field"><label>Descuento mín (%)</label>
+        <select id="r-disc"><option value="0">Sin mínimo</option><option value="10">10%+</option><option value="20">20%+</option><option value="30">30%+</option><option value="50">50%+</option></select>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="sb-sec">
+      <span class="sblabel">Calidad</span>
+      <div class="row2">
+        <div class="field"><label>Rating mín</label>
+          <select id="r-rmin"><option value="0">Cualquiera</option><option value="3">3+</option><option value="4">4+</option><option value="4.5">4.5+</option></select>
+        </div>
+        <div class="field"><label>Reseñas mín</label>
+          <select id="r-rev"><option value="0">Sin mín</option><option value="100">100+</option><option value="500">500+</option><option value="1000">1k+</option><option value="5000">5k+</option></select>
+        </div>
+      </div>
+      <div class="field"><label>Vendedor (texto)</label><input type="text" id="r-seller" placeholder="nombre vendedor…"></div>
+    </div>
+    <hr class="divider">
+    <div class="sb-sec">
+      <span class="sblabel">Logística</span>
+      <div class="field"><label>Envío</label>
+        <select id="r-ship"><option value="">Cualquiera</option><option value="free">Gratis</option><option value="fast">Rápido</option></select>
+      </div>
+      <div class="field"><label>Stock</label>
+        <select id="r-stock"><option value="">Con/sin stock</option><option value="in">Solo en stock</option></select>
+      </div>
+      <div class="field"><label>Tendencia</label>
+        <select id="r-trend"><option value="">Todas</option><option value="up">En alza ▲</option><option value="down">En baja ▼</option><option value="stable">Estable</option></select>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="sb-sec">
+      <span class="sblabel">Orden y cantidad</span>
+      <div class="field"><label>Ordenar por</label>
+        <select id="r-sort"><option value="score">Score inteligente</option><option value="monthly_sales">Más vendidos</option><option value="price_asc">Menor precio</option><option value="price_desc">Mayor precio</option><option value="rating">Mejor rating</option><option value="reviews_count">Más reseñas</option><option value="discount_pct">Mayor descuento</option></select>
+      </div>
+      <div class="field"><label>Resultados</label>
+        <select id="r-limit"><option value="10">10</option><option value="20">20</option><option value="30">30</option></select>
+      </div>
+    </div>
+    <hr class="divider">
+    <span class="sblabel">Plataformas</span>
+    <div class="chips" id="r-chips">
+      <div class="chip on" data-p="MercadoLibre" onclick="tc(this)">MercadoLibre</div>
+      <div class="chip on" data-p="Amazon" onclick="tc(this)">Amazon</div>
+      <div class="chip on" data-p="Shein" onclick="tc(this)">Shein</div>
+      <div class="chip on" data-p="Temu" onclick="tc(this)">Temu</div>
+      <div class="chip on" data-p="eBay" onclick="tc(this)">eBay</div>
+      <div class="chip on" data-p="AliExpress" onclick="tc(this)">AliExpress</div>
+      <div class="chip on" data-p="TiendaMia" onclick="tc(this)">TiendaMia</div>
+    </div>
+  </aside>
+  <main class="main">
+    <div class="stats">
+      <div class="stat"><div class="stat-lbl">Productos</div><div class="stat-val" id="r-s1">—</div><div class="stat-sub">encontrados</div></div>
+      <div class="stat"><div class="stat-lbl">Precio promedio</div><div class="stat-val" id="r-s2">—</div><div class="stat-sub">USD</div></div>
+      <div class="stat"><div class="stat-lbl">Mejor precio</div><div class="stat-val" id="r-s3">—</div><div class="stat-sub" id="r-s3p">—</div></div>
+      <div class="stat"><div class="stat-lbl">Rating promedio</div><div class="stat-val" id="r-s4">—</div><div class="stat-sub">de 5 ★</div></div>
+    </div>
+    <div class="tcard">
+      <div class="thdr"><div class="ttitle" id="r-title">Configurá los filtros y buscá</div>
+        <div class="xbtns"><button class="xbtn" onclick="xCSV('r')">↓ CSV</button><button class="xbtn" onclick="xJSON('r')">↓ JSON</button></div>
+      </div>
+      <div id="r-tbody"><div class="state-box"><div class="state-icon">🔍</div><div class="state-text">Ingresá un producto y hacé clic en <strong>Buscar</strong></div></div></div>
+    </div>
+  </main>
+</div>
+
+<!-- ══════════════════ TAB 2: COMPARE ══════════════════ -->
+<div class="page" id="page-compare">
+  <aside class="sb">
+    <div class="sb-sec">
+      <span class="sblabel">Identificación</span>
+      <div class="field"><label>Nombre *</label><input type="text" id="c-name" placeholder="ej: JBL Go 3, iPhone 15…"></div>
+      <div class="field"><label>Marca / Brand</label><input type="text" id="c-brand" placeholder="ej: JBL, Samsung…"></div>
+      <div class="field"><label>Tipo / Modelo / Variante</label><input type="text" id="c-type" placeholder="ej: 64GB Negro, Talle M…"></div>
+      <button class="sbtn" id="c-btn" onclick="doCompare()">Comparar vendedores →</button>
+      <label class="ws-toggle">
+        <input type="checkbox" id="c-websearch" checked>
+        <div><div class="ws-lbl">🌐 Incluir búsqueda web</div><div class="ws-sub">Google + DuckDuckGo + Bing</div></div>
+      </label>
+      <label class="ws-toggle" style="margin-top:5px;">
+        <input type="checkbox" id="c-webonly">
+        <div><div class="ws-lbl">Solo búsqueda web</div><div class="ws-sub">Sin scrapers de plataformas</div></div>
+      </label>
+    </div>
+    <hr class="divider">
+    <div class="sb-sec">
+      <span class="sblabel">Precio</span>
+      <div class="row2">
+        <div class="field"><label>Mín ($)</label><input type="number" id="c-pmin" placeholder="0" min="0"></div>
+        <div class="field"><label>Máx ($)</label><input type="number" id="c-pmax" placeholder="∞" min="0"></div>
+      </div>
+      <div class="field"><label>Descuento mín (%)</label>
+        <select id="c-disc"><option value="0">Sin mínimo</option><option value="10">10%+</option><option value="20">20%+</option><option value="30">30%+</option><option value="50">50%+</option></select>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="sb-sec">
+      <span class="sblabel">Vendedor y calidad</span>
+      <div class="field"><label>Filtrar vendedor</label><input type="text" id="c-seller" placeholder="nombre vendedor…"></div>
+      <div class="row2">
+        <div class="field"><label>Rating mín</label>
+          <select id="c-rmin"><option value="0">Cualquiera</option><option value="3">3+</option><option value="4">4+</option><option value="4.5">4.5+</option></select>
+        </div>
+        <div class="field"><label>Reseñas mín</label>
+          <select id="c-rev"><option value="0">Sin mín</option><option value="50">50+</option><option value="200">200+</option><option value="500">500+</option><option value="1000">1k+</option></select>
+        </div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="sb-sec">
+      <span class="sblabel">Logística</span>
+      <div class="field"><label>Envío</label>
+        <select id="c-ship"><option value="">Cualquiera</option><option value="free">Gratis</option><option value="fast">Rápido</option></select>
+      </div>
+      <div class="field"><label>Stock</label>
+        <select id="c-stock"><option value="">Con/sin stock</option><option value="in">Solo en stock</option></select>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="sb-sec">
+      <span class="sblabel">Orden</span>
+      <div class="field">
+        <select id="c-sort"><option value="price_asc">Menor precio</option><option value="price_desc">Mayor precio</option><option value="rating">Mejor rating</option><option value="reviews_count">Más reseñas</option><option value="score">Score</option><option value="discount_pct">Mayor descuento</option></select>
+      </div>
+    </div>
+    <hr class="divider">
+    <span class="sblabel">Plataformas</span>
+    <div class="chips" id="c-chips">
+      <div class="chip on" data-p="MercadoLibre" onclick="tc(this)">MercadoLibre</div>
+      <div class="chip on" data-p="Amazon" onclick="tc(this)">Amazon</div>
+      <div class="chip on" data-p="Shein" onclick="tc(this)">Shein</div>
+      <div class="chip on" data-p="Temu" onclick="tc(this)">Temu</div>
+      <div class="chip on" data-p="eBay" onclick="tc(this)">eBay</div>
+      <div class="chip on" data-p="AliExpress" onclick="tc(this)">AliExpress</div>
+      <div class="chip on" data-p="TiendaMia" onclick="tc(this)">TiendaMia</div>
+    </div>
+  </aside>
+  <main class="main">
+    <div class="banner" id="c-banner">
+      <div class="bcard hl"><div class="blbl">💰 Mejor precio</div><div class="bval" id="c-bp">—</div><div class="bsub" id="c-bpp">—</div></div>
+      <div class="bcard"><div class="blbl">⭐ Mejor rating</div><div class="bval" id="c-br">—</div><div class="bsub" id="c-brp">—</div></div>
+      <div class="bcard"><div class="blbl">🏪 Plataformas</div><div class="bval" id="c-pc">—</div><div class="bsub" id="c-pl">—</div></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-lbl">Vendedores</div><div class="stat-val" id="c-s1">—</div><div class="stat-sub">encontrados</div></div>
+      <div class="stat"><div class="stat-lbl">Precio mínimo</div><div class="stat-val" id="c-s2">—</div><div class="stat-sub">USD</div></div>
+      <div class="stat"><div class="stat-lbl">Precio máximo</div><div class="stat-val" id="c-s3">—</div><div class="stat-sub">USD</div></div>
+      <div class="stat"><div class="stat-lbl">Ahorro máximo</div><div class="stat-val" id="c-s4">—</div><div class="stat-sub">vs precio más alto</div></div>
+    </div>
+    <div class="tcard">
+      <div class="thdr"><div class="ttitle" id="c-title">Ingresá nombre + marca para comparar vendedores</div>
+        <div class="xbtns"><button class="xbtn" onclick="xCSV('c')">↓ CSV</button><button class="xbtn" onclick="xJSON('c')">↓ JSON</button></div>
+      </div>
+      <div id="c-tbody"><div class="state-box"><div class="state-icon">🔎</div><div class="state-text">Buscá un producto específico para ver todos sus vendedores<br>incluyendo resultados de Google, DDG y Bing.</div></div></div>
+    </div>
+  </main>
+</div>
+
+<!-- ══════════════════ TAB 3: OPORTUNIDADES ══════════════════ -->
+<div class="page" id="page-opp">
+  <aside class="sb">
+    <div class="sb-sec">
+      <span class="sblabel">Búsqueda</span>
+      <div class="field"><label>Producto o nicho</label><input type="text" id="o-q" placeholder="ej: auriculares, fitness, camping…"></div>
+      <button class="sbtn" id="o-btn" onclick="doOpp()">Analizar oportunidades →</button>
+    </div>
+    <hr class="divider">
+    <div class="sb-sec">
+      <span class="sblabel">Filtros de oportunidad</span>
+      <div class="field"><label>Trend Score mínimo</label>
+        <select id="o-mints"><option value="0">Sin mínimo</option><option value="40">40+</option><option value="55">55+</option><option value="70">70+</option><option value="80">80+</option></select>
+      </div>
+      <div class="field"><label>Arbitraje mínimo (USD)</label>
+        <select id="o-arb"><option value="0">Sin mínimo</option><option value="2">$2+</option><option value="5">$5+</option><option value="10">$10+</option><option value="20">$20+</option></select>
+      </div>
+      <div class="field"><label>Margen estimado mín (%)</label>
+        <select id="o-margin"><option value="0">Sin mínimo</option><option value="20">20%+</option><option value="30">30%+</option><option value="40">40%+</option></select>
+      </div>
+      <label class="ws-toggle">
+        <input type="checkbox" id="o-early">
+        <div><div class="ws-lbl">Solo Early Trends 🚀</div><div class="ws-sub">Productos emergentes con alto crecimiento</div></div>
+      </label>
+      <label class="ws-toggle" style="margin-top:5px;">
+        <input type="checkbox" id="o-hidefp" checked>
+        <div><div class="ws-lbl">Ocultar falsos positivos ⚠️</div><div class="ws-sub">Filtra datos con riesgo de error</div></div>
+      </label>
+    </div>
+    <hr class="divider">
+    <div class="sb-sec">
+      <span class="sblabel">Precio</span>
+      <div class="row2">
+        <div class="field"><label>Mín ($)</label><input type="number" id="o-pmin" placeholder="0" min="0"></div>
+        <div class="field"><label>Máx ($)</label><input type="number" id="o-pmax" placeholder="∞" min="0"></div>
+      </div>
+    </div>
+    <hr class="divider">
+    <span class="sblabel">Plataformas</span>
+    <div class="chips" id="o-chips">
+      <div class="chip on" data-p="MercadoLibre" onclick="tc(this)">MercadoLibre</div>
+      <div class="chip on" data-p="Amazon" onclick="tc(this)">Amazon</div>
+      <div class="chip on" data-p="Shein" onclick="tc(this)">Shein</div>
+      <div class="chip on" data-p="Temu" onclick="tc(this)">Temu</div>
+      <div class="chip on" data-p="eBay" onclick="tc(this)">eBay</div>
+      <div class="chip on" data-p="AliExpress" onclick="tc(this)">AliExpress</div>
+      <div class="chip on" data-p="TiendaMia" onclick="tc(this)">TiendaMia</div>
+    </div>
+  </aside>
+  <main class="main">
+    <div class="stats" id="o-stats">
+      <div class="stat"><div class="stat-lbl">Oportunidades</div><div class="stat-val" id="o-s1">—</div><div class="stat-sub">detectadas</div></div>
+      <div class="stat"><div class="stat-lbl">Early Trends</div><div class="stat-val" id="o-s2">—</div><div class="stat-sub">productos emergentes</div></div>
+      <div class="stat"><div class="stat-lbl">Con arbitraje</div><div class="stat-val" id="o-s3">—</div><div class="stat-sub">diferencia &gt; $5 entre plataformas</div></div>
+      <div class="stat"><div class="stat-lbl">Trend Score prom.</div><div class="stat-val" id="o-s4">—</div><div class="stat-sub">de 100</div></div>
+    </div>
+    <div class="tcard">
+      <div class="thdr"><div class="ttitle" id="o-title">Ingresá un producto o nicho para detectar oportunidades</div>
+        <div class="xbtns"><button class="xbtn" onclick="xCSV('o')">↓ CSV</button><button class="xbtn" onclick="xJSON('o')">↓ JSON</button></div>
+      </div>
+      <div id="o-tbody"><div class="state-box"><div class="state-icon">🚀</div><div class="state-text">El algoritmo de Trend Score analiza ventas, crecimiento de reseñas,<br>arbitraje entre plataformas y margen potencial.</div></div></div>
+    </div>
+  </main>
+</div>
+
+<!-- ══════════════════ TAB 4: ABOUT ══════════════════ -->
+<div class="page full" id="page-about" style="display:none;">
+  <div class="about-wrap">
+    <div class="about-hero">
+      <h1>Inteligencia de precios para el<br><span>e-commerce moderno</span></h1>
+      <p>Price Scout Bot rastrea, normaliza y analiza productos en las principales plataformas. Encontrá el mejor precio, detectá tendencias y tomá decisiones basadas en datos reales.</p>
+    </div>
+
+    <div class="about-section">
+      <div class="about-badge">¿Qué es?</div>
+      <h2>Una herramienta de análisis, no solo un comparador</h2>
+      <p>La mayoría de los comparadores muestran datos estáticos de pocas tiendas. Price Scout Bot hace algo diferente: <strong style="color:var(--tx)">scrapea en tiempo real</strong>, normaliza datos entre plataformas con estructuras completamente distintas, calcula un score de oportunidad y detecta tendencias emergentes.</p>
+      <p>Diseñado para tres tipos de usuario: el <strong style="color:var(--tx)">comprador inteligente</strong> que quiere el mejor precio, el <strong style="color:var(--tx)">revendedor</strong> que busca arbitraje entre plataformas, y el <strong style="color:var(--tx)">analista</strong> que quiere entender qué productos están en alza.</p>
+    </div>
+
+    <div class="about-section">
+      <div class="about-badge">Arquitectura</div>
+      <h2>Cómo funciona por dentro</h2>
+      <div class="flow-row">
+        <div class="fstep"><div class="fn">1</div><div class="ft">Scraping</div><div class="fd">Scrapers por plataforma + fallback sintético</div></div>
+        <div class="fstep"><div class="fn">2</div><div class="ft">Normalización</div><div class="fd">Moneda, limpieza de precios, calidad</div></div>
+        <div class="fstep"><div class="fn">3</div><div class="ft">Scoring</div><div class="fd">Score + Trend Score con 5 componentes</div></div>
+        <div class="fstep"><div class="fn">4</div><div class="ft">Análisis</div><div class="fd">Arbitraje, early trends, matching</div></div>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <div class="about-badge">Funcionalidades</div>
+      <h2>Qué podés hacer</h2>
+      <div class="about-feat-grid">
+        <div class="afeat"><div class="afeat-icon">📊</div><div class="afeat-title">Ranking General</div><div class="afeat-desc">Buscá cualquier producto y obtené un ranking normalizado entre plataformas ordenado por score.</div></div>
+        <div class="afeat"><div class="afeat-icon">🔍</div><div class="afeat-title">Producto Específico</div><div class="afeat-desc">Buscá nombre + marca + tipo y compará todos los vendedores. Incluye búsqueda web (Google/DDG/Bing) y opción "solo web".</div></div>
+        <div class="afeat"><div class="afeat-icon">🚀</div><div class="afeat-title">Oportunidades</div><div class="afeat-desc">Trend Score detecta early trends, arbitraje entre plataformas y márgenes potenciales de reventa.</div></div>
+        <div class="afeat"><div class="afeat-icon">✓ / ~</div><div class="afeat-title">Calidad de datos</div><div class="afeat-desc">Cada dato está etiquetado como "real" (scrapeado) o "estimado" (fallback por anti-bot).</div></div>
+        <div class="afeat"><div class="afeat-icon">🌐</div><div class="afeat-title">Búsqueda Web</div><div class="afeat-desc">Google + DuckDuckGo + Bing: encuentra el producto en cualquier tienda, no solo las plataformas fijas.</div></div>
+        <div class="afeat"><div class="afeat-icon">↓</div><div class="afeat-title">Exportación</div><div class="afeat-desc">CSV (con BOM para Excel) o JSON estructurado con todos los campos incluyendo trend_score y arbitraje.</div></div>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <div class="about-badge">Algoritmo</div>
+      <h2>Cómo se calculan los scores</h2>
+      <p>El <strong style="color:var(--tx)">Score inteligente</strong> mide popularidad/valor (0–100). El <strong style="color:var(--tx)">Trend Score</strong> mide oportunidad de mercado (0–100). Son métricas complementarias.</p>
+      <div class="formula-box">
+        <span class="c3">// Score inteligente (popularidad)</span><br>
+        Score = <span class="c1">ventas_norm</span> × 0.40 + <span class="c1">rating_norm</span> × 0.30<br>
+              + <span class="c1">reseñas_norm</span> × 0.20 + <span class="c1">precio_competitivo</span> × 0.10<br><br>
+        <span class="c3">// Trend Score (oportunidad de mercado)</span><br>
+        TrendScore = <span class="c2">sales_velocity</span> × 0.30 + <span class="c2">review_growth</span> × 0.25<br>
+                   + <span class="c2">search_demand</span> × 0.20 + <span class="c2">price_spread</span> × 0.15<br>
+                   + <span class="c2">margin_score</span> × 0.10<br><br>
+        <span class="c3">// Early Trend = review_growth ≥ 12% AND reviews &lt; 5000 AND trend = "up"</span><br>
+        <span class="c3">// Falso positivo = score ≥ 75 AND reviews &lt; 100 AND sales &lt; 500</span>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <div class="about-badge">Transparencia</div>
+      <h2>Limitaciones conocidas</h2>
+      <ul class="limit-list">
+        <li><span>⚠️</span><span class="ltx"><strong style="color:var(--tx)">Anti-bot:</strong> Temu y Shein bloquean scrapers. El sistema usa datos sintéticos realistas marcados como "estimado". URLs apuntan a búsqueda del producto, no al listing exacto.</span></li>
+        <li><span>📊</span><span class="ltx"><strong style="color:var(--tx)">Reseñas:</strong> El conteo del listado puede diferir del detalle del producto. Es una limitación del scraping de resultados de búsqueda.</span></li>
+        <li><span>💱</span><span class="ltx"><strong style="color:var(--tx)">ARS → USD:</strong> Conversión a tipo de cambio fijo (~1050). Puede estar desactualizado, usarlo solo como referencia.</span></li>
+        <li><span>🌐</span><span class="ltx"><strong style="color:var(--tx)">Búsqueda web:</strong> Los precios de Google/Bing se extraen de snippets de texto. Son aproximados y pueden ser el precio "desde".</span></li>
+        <li><span>📈</span><span class="ltx"><strong style="color:var(--tx)">Trend Score:</strong> El crecimiento de reseñas es simulado. En producción requeriría un job periódico guardando snapshots en DB.</span></li>
+      </ul>
+    </div>
+
+    <div class="about-section">
+      <div class="about-badge">Roadmap</div>
+      <h2>Qué viene después</h2>
+      <div class="rm-grid">
+        <div class="rm-col">
+          <div class="rm-head now">✓ Disponible</div>
+          <div class="rm-item">Ranking general multi-plataforma</div>
+          <div class="rm-item">Producto específico + comparador</div>
+          <div class="rm-item">Web search (Google/DDG/Bing)</div>
+          <div class="rm-item">Trend Score + Oportunidades</div>
+          <div class="rm-item">Export CSV / JSON</div>
+          <div class="rm-item">Badge de calidad de datos</div>
+        </div>
+        <div class="rm-col">
+          <div class="rm-head soon">→ Próximamente</div>
+          <div class="rm-item">Watchlist con alertas de precio</div>
+          <div class="rm-item">Histórico de precios (sparklines)</div>
+          <div class="rm-item">Matching por embeddings NLP</div>
+          <div class="rm-item">Selenium headless opcional</div>
+          <div class="rm-item">API REST pública</div>
+          <div class="rm-item">Scheduling automático</div>
+        </div>
+        <div class="rm-col">
+          <div class="rm-head fut">◌ Futuro</div>
+          <div class="rm-item">Dashboard histórico + sparklines</div>
+          <div class="rm-item">Google Sheets integration</div>
+          <div class="rm-item">Alertas email/Telegram</div>
+          <div class="rm-item">ML predicción de precios</div>
+          <div class="rm-item">Multi-usuario con perfiles</div>
+          <div class="rm-item">Plugin de browser</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DATA={r:[],c:[],o:[]}, LAST={r:'',c:'',o:''};
+
+function sw(id){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['ranking','compare','opp','about'][i]===id));
+  document.querySelectorAll('.page').forEach(p=>{p.style.display='none';p.classList.remove('active');});
+  const pg=document.getElementById('page-'+id);
+  if(id==='about'){pg.style.display='block';}
+  else{pg.style.display='';pg.classList.add('active');}
+}
+
+function tc(el){el.classList.toggle('on');}
+function plats(g){return[...document.querySelectorAll(`#${g}-chips .chip.on`)].map(c=>c.dataset.p);}
+function pcls(p){return{MercadoLibre:'pml',Amazon:'pamz',Shein:'psh',Temu:'pte',eBay:'peb',AliExpress:'pal',TiendaMia:'ptm',Web:'pweb'}[p]||'pweb';}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',4000);}
+function starsH(r){return'★'.repeat(Math.floor(r))+(r%1>=.5?'½':'')+' '+r.toFixed(1);}
+function trendH(t){if(t==='up')return'<span class="tup">▲ sube</span>';if(t==='down')return'<span class="tdn">▼ baja</span>';return'<span class="tst">— estable</span>';}
+function dqH(dq){if(dq==='exact')return'<span class="dq dq-e" title="Dato real extraído del listing">✓ real</span>';return'<span class="dq dq-s" title="Estimado — anti-bot activo">~ est.</span>';}
+function linkH(url,dq){if(!url)return'<span style="color:var(--mu);font-size:10px;">—</span>';const s=dq==='estimated';return`<a href="${url}" target="_blank" rel="noopener" class="link-btn${s?' link-srch':''}" title="${s?'Búsqueda del producto':'Ir al producto'}">${s?'🔍 Buscar':'→ Ver'}</a>`;}
+function oppH(lbl){const m={'🔥 Hot':'opp-hot','📈 En alza':'opp-up','🚀 Early Trend':'opp-early','👀 Observar':'opp-watch','💤 Bajo':'opp-low','⚠️ Verificar':'opp-warn'};return`<span class="opp-label ${m[lbl]||'opp-low'}">${lbl}</span>`;}
+function setLoad(id,msg){document.getElementById(id).innerHTML=`<div class="state-box"><div class="spinner"></div><div class="state-text">${msg}</div></div>`;}
+
+function buildTable(products,showScore=true,showTrend=false){
+  if(!products.length)return'<div class="state-box"><div class="state-icon">🚫</div><div class="state-text">Sin resultados con los filtros aplicados.</div></div>';
+  let h=`<div class="twrap"><table><thead><tr><th>#</th><th>Producto</th><th>Plataforma</th><th>Precio</th><th>Rating</th><th>Reseñas</th><th>Ventas/mes</th><th>Tend.</th>`;
+  if(showScore)h+=`<th>Score</th>`;
+  if(showTrend)h+=`<th>Trend</th><th>Oportunidad</th><th>Arbitraje</th>`;
+  h+=`<th>Envío</th><th>Cal.</th><th>Link</th></tr></thead><tbody>`;
+  products.forEach(p=>{
+    const rc=p.rank<=3?'r'+p.rank:'rn';
+    const disc=p.discount_pct>0?`<span class="disc">-${p.discount_pct}%</span>`:'';
+    const orig=p.original_price>p.price?`<span class="orig">$${p.original_price.toFixed(2)}</span>`:'';
+    const sv=[p.free_shipping?'<span class="ship-f">✓ Gratis</span>':'',p.fast_shipping?'<span class="ship-r">⚡ Rápido</span>':''].filter(Boolean).join('<br>')||'<span style="color:var(--mu);font-size:10px;">Std</span>';
+    let scoreCell=showScore?`<td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fg" style="width:${p.score}%"></div></div><span class="score-n">${p.score}</span></div></td>`:'';
+    let trendCell='',oppCell='',arbCell='';
+    if(showTrend){
+      trendCell=`<td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fg trend" style="width:${p.trend_score||0}%"></div></div><span class="score-n">${p.trend_score||0}</span></div></td>`;
+      oppCell=`<td>${oppH(p.opportunity_label||'💤 Bajo')}</td>`;
+      const arb=p.arbitrage_usd||0;
+      arbCell=`<td><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:${arb>0?'var(--ac2)':'var(--mu)'}">${arb>0?'+$'+arb.toFixed(2):'—'}</span></td>`;
+    }
+    h+=`<tr><td><div class="rank ${rc}">${p.rank}</div></td>
+    <td><div class="pname">${p.name}</div><div class="pcat">${p.category}${p.seller?' · '+p.seller:''}</div></td>
+    <td><span class="pb ${pcls(p.platform)}">${p.platform}</span></td>
+    <td><span class="price">$${p.price.toFixed(2)}</span>${disc}${orig}</td>
+    <td><span class="stars">${starsH(p.rating)}</span></td>
+    <td><span class="sn">${(p.reviews_count||0).toLocaleString()}</span></td>
+    <td><span class="sn">${(p.monthly_sales||0).toLocaleString()}</span><span class="ss">por mes</span></td>
+    <td>${trendH(p.trend)}</td>
+    ${scoreCell}${trendCell}${oppCell}${arbCell}
+    <td>${sv}</td><td>${dqH(p.data_quality)}</td><td>${linkH(p.url,p.data_quality)}</td></tr>`;
+  });
+  return h+'</tbody></table></div>';
+}
+
+// ── RANKING ──
+async function doRanking(){
+  const q=document.getElementById('r-q').value.trim(),cat=document.getElementById('r-cat').value,ps=plats('r');
+  if(!q&&!cat){toast('Ingresá un producto o categoría');return;}
+  if(!ps.length){toast('Seleccioná al menos una plataforma');return;}
+  LAST.r=q||cat;
+  const btn=document.getElementById('r-btn');btn.disabled=true;btn.textContent='Buscando…';
+  setLoad('r-tbody',`Scrapeando ${ps.length} plataformas…`);
+  document.getElementById('r-title').textContent='Buscando…';
+  try{
+    const resp=await fetch('/api/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      query:q,category:cat,platforms:ps,sort:document.getElementById('r-sort').value,limit:parseInt(document.getElementById('r-limit').value),
+      filters:{min_price:document.getElementById('r-pmin').value||null,max_price:document.getElementById('r-pmax').value||null,min_discount:document.getElementById('r-disc').value||0,min_rating:document.getElementById('r-rmin').value||0,min_reviews:document.getElementById('r-rev').value||0,seller:document.getElementById('r-seller').value,trend:document.getElementById('r-trend').value,shipping:document.getElementById('r-ship').value,stock_only:document.getElementById('r-stock').value==='in'}
+    })});
+    const d=await resp.json();if(d.error){toast(d.error);return;}
+    DATA.r=d.products||[];
+    document.getElementById('r-title').textContent=`Ranking: "${LAST.r}" — ${DATA.r.length} productos`;
+    document.getElementById('r-tbody').innerHTML=buildTable(DATA.r);
+    updRankStats(DATA.r);
+  }catch(e){toast('Error: '+e.message);}
+  finally{btn.disabled=false;btn.textContent='Buscar →';}
+}
+function updRankStats(p){
+  document.getElementById('r-s1').textContent=p.length;
+  if(!p.length)return;
+  document.getElementById('r-s2').textContent='$'+(p.reduce((a,x)=>a+x.price,0)/p.length).toFixed(2);
+  const ch=p.reduce((a,x)=>x.price<a.price?x:a,p[0]);
+  document.getElementById('r-s3').textContent='$'+ch.price.toFixed(2);
+  document.getElementById('r-s3p').textContent=ch.platform;
+  document.getElementById('r-s4').textContent=(p.reduce((a,x)=>a+x.rating,0)/p.length).toFixed(1)+' ★';
+}
+
+// ── COMPARE ──
+async function doCompare(){
+  const name=document.getElementById('c-name').value.trim(),brand=document.getElementById('c-brand').value.trim(),type=document.getElementById('c-type').value.trim();
+  const ps=plats('c'),webOnly=document.getElementById('c-webonly').checked;
+  if(!name){toast('Ingresá el nombre del producto');return;}
+  if(!webOnly&&!ps.length){toast('Seleccioná al menos una plataforma o activá solo búsqueda web');return;}
+  LAST.c=[brand,name,type].filter(Boolean).join(' ');
+  const btn=document.getElementById('c-btn');btn.disabled=true;btn.textContent='Buscando…';
+  setLoad('c-tbody',`Comparando "${LAST.c}"${webOnly?' (solo web)':' en '+ps.length+' plataformas'}…`);
+  document.getElementById('c-title').textContent='Buscando…';
+  document.getElementById('c-banner').classList.remove('show');
+  try{
+    const resp=await fetch('/api/product-compare',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      name,brand,type,platforms:ps,use_websearch:document.getElementById('c-websearch').checked,web_only:webOnly,
+      sort:document.getElementById('c-sort').value,
+      filters:{min_price:document.getElementById('c-pmin').value||null,max_price:document.getElementById('c-pmax').value||null,min_discount:document.getElementById('c-disc').value||0,min_rating:document.getElementById('c-rmin').value||0,min_reviews:document.getElementById('c-rev').value||0,seller:document.getElementById('c-seller').value,shipping:document.getElementById('c-ship').value,stock_only:document.getElementById('c-stock').value==='in'}
+    })});
+    const d=await resp.json();if(d.error){toast(d.error);return;}
+    DATA.c=d.products||[];
+    document.getElementById('c-title').textContent=`"${LAST.c}" — ${DATA.c.length} vendedor${DATA.c.length!==1?'es':''}`;
+    document.getElementById('c-tbody').innerHTML=buildTable(DATA.c,false);
+    updCompStats(DATA.c,d);
+  }catch(e){toast('Error: '+e.message);}
+  finally{btn.disabled=false;btn.textContent='Comparar vendedores →';}
+}
+function updCompStats(p,d){
+  document.getElementById('c-s1').textContent=p.length;
+  if(!p.length)return;
+  const prices=p.map(x=>x.price).filter(Boolean);
+  const mn=Math.min(...prices),mx=Math.max(...prices);
+  document.getElementById('c-s2').textContent='$'+mn.toFixed(2);
+  document.getElementById('c-s3').textContent='$'+mx.toFixed(2);
+  document.getElementById('c-s4').textContent=mx>mn?(((mx-mn)/mx)*100).toFixed(0)+'%':'—';
+  const ch=p.reduce((a,x)=>x.price<a.price?x:a,p[0]),br=p.reduce((a,x)=>x.rating>a.rating?x:a,p[0]);
+  document.getElementById('c-bp').textContent='$'+ch.price.toFixed(2);
+  document.getElementById('c-bpp').textContent=ch.platform+' · '+ch.seller;
+  document.getElementById('c-br').textContent=br.rating.toFixed(1)+' ★';
+  document.getElementById('c-brp').textContent=br.platform;
+  const pf=d.platforms_found||[...new Set(p.map(x=>x.platform))];
+  document.getElementById('c-pc').textContent=pf.length;
+  document.getElementById('c-pl').textContent=pf.slice(0,3).join(', ')+(pf.length>3?'…':'');
+  document.getElementById('c-banner').classList.add('show');
+}
+
+// ── OPPORTUNITIES ──
+async function doOpp(){
+  const q=document.getElementById('o-q').value.trim(),ps=plats('o');
+  if(!q){toast('Ingresá un producto o nicho');return;}
+  if(!ps.length){toast('Seleccioná al menos una plataforma');return;}
+  LAST.o=q;
+  const btn=document.getElementById('o-btn');btn.disabled=true;btn.textContent='Analizando…';
+  setLoad('o-tbody',`Analizando oportunidades para "<strong>${q}</strong>"…`);
+  document.getElementById('o-title').textContent='Analizando…';
+  try{
+    const resp=await fetch('/api/opportunities',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      query:q,platforms:ps,limit:30,
+      filters:{min_trend_score:document.getElementById('o-mints').value||0,min_arbitrage_usd:document.getElementById('o-arb').value||0,min_margin_pct:document.getElementById('o-margin').value||0,only_early_trends:document.getElementById('o-early').checked,hide_false_positives:document.getElementById('o-hidefp').checked,min_price:document.getElementById('o-pmin').value||null,max_price:document.getElementById('o-pmax').value||null}
+    })});
+    const d=await resp.json();if(d.error){toast(d.error);return;}
+    DATA.o=d.products||[];
+    const st=d.stats||{};
+    document.getElementById('o-title').textContent=`Oportunidades: "${q}" — ${DATA.o.length} detectadas`;
+    document.getElementById('o-tbody').innerHTML=buildTable(DATA.o,true,true);
+    document.getElementById('o-s1').textContent=DATA.o.length;
+    document.getElementById('o-s2').textContent=st.early_trends||0;
+    document.getElementById('o-s3').textContent=st.arbitrage_opps||0;
+    document.getElementById('o-s4').textContent=(st.avg_trend_score||0).toFixed(1);
+  }catch(e){toast('Error: '+e.message);}
+  finally{btn.disabled=false;btn.textContent='Analizar oportunidades →';}
+}
+
+// ── EXPORT ──
+async function xCSV(g){
+  if(!DATA[g].length){toast('Primero realizá una búsqueda');return;}
+  const r=await fetch('/api/export/csv',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({products:DATA[g],query:LAST[g]})});
+  const b=await r.blob();const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='price_scout_'+LAST[g].replace(/\s/g,'_')+'.csv';a.click();
+}
+async function xJSON(g){
+  if(!DATA[g].length){toast('Primero realizá una búsqueda');return;}
+  const r=await fetch('/api/export/json',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({products:DATA[g],query:LAST[g]})});
+  const b=await r.blob();const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='price_scout_'+LAST[g].replace(/\s/g,'_')+'.json';a.click();
+}
+
+// Keyboard shortcuts
+document.getElementById('r-q').addEventListener('keydown',e=>{if(e.key==='Enter')doRanking();});
+document.getElementById('c-name').addEventListener('keydown',e=>{if(e.key==='Enter')doCompare();});
+document.getElementById('c-brand').addEventListener('keydown',e=>{if(e.key==='Enter')doCompare();});
+document.getElementById('o-q').addEventListener('keydown',e=>{if(e.key==='Enter')doOpp();});
+// web-only toggle disables platform chips
+document.getElementById('c-webonly').addEventListener('change',function(){
+  document.getElementById('c-chips').style.opacity=this.checked?'.35':'1';
+  document.getElementById('c-chips').style.pointerEvents=this.checked?'none':'auto';
+});
+</script>
+</body>
+</html>

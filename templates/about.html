@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Sobre Price Scout Bot</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0f12;--s1:#161920;--s2:#1e2229;--border:#2a2f3a;
+  --text:#e8eaf0;--muted:#7a8199;--accent:#4f8ef7;--accent2:#6ee7b7;
+  --danger:#f87171;--warn:#fbbf24;--purple:#a78bfa;--pink:#f9a8d4;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Space Grotesk',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;}
+a{color:var(--accent);text-decoration:none;}
+a:hover{text-decoration:underline;}
+
+/* NAV */
+nav{border-bottom:1px solid var(--border);padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:100;}
+.nav-logo{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:600;letter-spacing:-.02em;}
+.nav-icon{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.nav-back{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:5px;}
+.nav-back:hover{color:var(--text);}
+
+/* HERO */
+.hero{max-width:900px;margin:0 auto;padding:5rem 2rem 3rem;}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--accent2);background:rgba(110,231,183,.08);border:1px solid rgba(110,231,183,.2);padding:4px 12px;border-radius:99px;margin-bottom:1.5rem;}
+.hero-dot{width:6px;height:6px;border-radius:50%;background:var(--accent2);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:700;letter-spacing:-.04em;line-height:1.15;margin-bottom:1.25rem;}
+h1 .hl{background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hero-desc{font-size:1.1rem;color:var(--muted);max-width:640px;line-height:1.7;margin-bottom:2rem;}
+.hero-cta{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;padding:11px 22px;border-radius:9px;font-size:14px;font-weight:600;transition:opacity .15s;}
+.hero-cta:hover{opacity:.85;text-decoration:none;}
+
+/* METRICS STRIP */
+.metrics{max-width:900px;margin:0 auto;padding:0 2rem 3rem;}
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+@media(max-width:600px){.metrics-grid{grid-template-columns:repeat(2,1fr);}}
+.metric{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:1.25rem;text-align:center;}
+.metric-val{font-size:2rem;font-weight:700;letter-spacing:-.04em;color:var(--accent);}
+.metric-label{font-size:12px;color:var(--muted);margin-top:4px;}
+
+/* SECTIONS */
+.content{max-width:900px;margin:0 auto;padding:0 2rem 6rem;}
+section{margin-bottom:4rem;}
+.section-badge{display:inline-block;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.2);padding:3px 10px;border-radius:4px;margin-bottom:.75rem;}
+h2{font-size:1.5rem;font-weight:600;letter-spacing:-.02em;margin-bottom:.75rem;}
+h3{font-size:1rem;font-weight:600;margin-bottom:.5rem;}
+p{color:var(--muted);line-height:1.75;margin-bottom:.75rem;}
+
+/* FEATURE GRID */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:1.25rem;}
+@media(max-width:700px){.feat-grid{grid-template-columns:1fr;}}
+.feat{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:1.25rem;}
+.feat-icon{font-size:1.5rem;margin-bottom:.6rem;}
+.feat-title{font-size:14px;font-weight:600;margin-bottom:.4rem;}
+.feat-desc{font-size:13px;color:var(--muted);line-height:1.6;}
+
+/* FLOW */
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:1.5rem;position:relative;}
+@media(max-width:650px){.flow{grid-template-columns:1fr;gap:8px;}}
+.flow-step{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center;position:relative;}
+.flow-step:not(:last-child)::after{content:'→';position:absolute;right:-14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;z-index:1;}
+@media(max-width:650px){.flow-step:not(:last-child)::after{content:'↓';right:auto;left:50%;top:auto;bottom:-14px;transform:translateX(-50%);}}
+.flow-n{width:24px;height:24px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;margin:0 auto .5rem;}
+.flow-title{font-size:13px;font-weight:600;margin-bottom:.3rem;}
+.flow-desc{font-size:12px;color:var(--muted);}
+
+/* PLATFORM GRID */
+.plat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:1.25rem;}
+@media(max-width:600px){.plat-grid{grid-template-columns:repeat(2,1fr);}}
+.plat{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;display:flex;align-items:center;gap:8px;}
+.plat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.plat-name{font-size:13px;font-weight:500;}
+.plat-tag{font-size:10px;color:var(--muted);margin-top:1px;}
+
+/* SCORING */
+.score-formula{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:1.25rem;font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:2;margin-top:1rem;}
+.score-formula .c1{color:var(--accent2);}
+.score-formula .c2{color:var(--warn);}
+.score-formula .c3{color:var(--muted);}
+
+/* LIMITATIONS */
+.limit-list{list-style:none;margin-top:1rem;}
+.limit-list li{display:flex;gap:10px;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:14px;}
+.limit-list li:last-child{border-bottom:none;}
+.limit-list .icon{flex-shrink:0;font-size:16px;}
+.limit-list .ltext{color:var(--muted);}
+
+/* ROADMAP */
+.roadmap{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:1.25rem;}
+@media(max-width:600px){.roadmap{grid-template-columns:1fr;}}
+.rm-col{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:1rem;}
+.rm-head{font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem;font-weight:600;}
+.rm-head.now{color:var(--accent2);}
+.rm-head.soon{color:var(--warn);}
+.rm-head.future{color:var(--purple);}
+.rm-item{font-size:13px;color:var(--muted);padding:.3rem 0;border-bottom:1px solid var(--border);}
+.rm-item:last-child{border-bottom:none;}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:2rem;text-align:center;}
+footer p{font-size:13px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <div class="nav-icon">🤖</div>
+    Price Scout Bot
+  </div>
+  <a href="/" class="nav-back">← Volver al dashboard</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag"><span class="hero-dot"></span> Activo · 7 plataformas · scraping en tiempo real</div>
+  <h1>Inteligencia de precios<br>para el <span class="hl">e-commerce moderno</span></h1>
+  <p class="hero-desc">
+    Price Scout Bot rastrea, normaliza y analiza productos en las principales plataformas de e-commerce
+    de Argentina y el mundo. Encontrá el mejor precio, detectá tendencias antes que el mercado
+    y tomá decisiones de compra o reventa basadas en datos reales.
+  </p>
+  <a href="/" class="hero-cta">Ir al dashboard →</a>
+</div>
+
+<!-- METRICS -->
+<div class="metrics">
+  <div class="metrics-grid">
+    <div class="metric"><div class="metric-val">7+</div><div class="metric-label">Plataformas monitoreadas</div></div>
+    <div class="metric"><div class="metric-val">3</div><div class="metric-label">Motores de búsqueda web</div></div>
+    <div class="metric"><div class="metric-val">100</div><div class="metric-label">Score máximo posible</div></div>
+    <div class="metric"><div class="metric-val">0</div><div class="metric-label">Costo de uso (open source)</div></div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- QUÉ ES -->
+  <section>
+    <div class="section-badge">¿Qué es?</div>
+    <h2>Una herramienta de inteligencia de precios, no solo un comparador</h2>
+    <p>La mayoría de los comparadores de precios muestran datos estáticos de un puñado de tiendas. Price Scout Bot hace algo diferente: <strong>scrapea en tiempo real</strong>, normaliza los datos entre plataformas con estructuras completamente distintas, calcula un score de oportunidad y detecta tendencias emergentes antes de que sean mainstream.</p>
+    <p>Está diseñado para tres tipos de usuario: el <strong>comprador inteligente</strong> que quiere el mejor precio, el <strong>vendedor o revendedor</strong> que busca arbitraje entre plataformas, y el <strong>analista de mercado</strong> que quiere entender qué productos están en alza.</p>
+  </section>
+
+  <!-- CÓMO FUNCIONA -->
+  <section>
+    <div class="section-badge">Arquitectura</div>
+    <h2>Cómo funciona por dentro</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-n">1</div>
+        <div class="flow-title">Scraping</div>
+        <div class="flow-desc">Scrapers independientes por plataforma con fallback sintético</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-n">2</div>
+        <div class="flow-title">Normalización</div>
+        <div class="flow-desc">Conversión de moneda, limpieza de precios, detección de calidad</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-n">3</div>
+        <div class="flow-title">Scoring</div>
+        <div class="flow-desc">Score inteligente y Trend Score con 5 componentes ponderados</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-n">4</div>
+        <div class="flow-title">Análisis</div>
+        <div class="flow-desc">Detección de arbitraje, early trends, matching cross-platform</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section>
+    <div class="section-badge">Funcionalidades</div>
+    <h2>Qué podés hacer</h2>
+    <div class="feat-grid">
+      <div class="feat">
+        <div class="feat-icon">📊</div>
+        <div class="feat-title">Ranking General</div>
+        <div class="feat-desc">Buscá cualquier producto y obtené un ranking normalizado entre plataformas, ordenado por score inteligente.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">🔍</div>
+        <div class="feat-title">Producto Específico</div>
+        <div class="feat-desc">Buscá un producto exacto (nombre + marca + tipo) y compará todos los vendedores disponibles en cada plataforma.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">🚀</div>
+        <div class="feat-title">Oportunidades</div>
+        <div class="feat-desc">Algoritmo de Trend Score que detecta productos en alza, arbitraje entre plataformas y márgenes potenciales.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">🌐</div>
+        <div class="feat-title">Búsqueda Web</div>
+        <div class="feat-desc">Google + DuckDuckGo + Bing: encuentra el producto en cualquier tienda online, no solo las plataformas fijas.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">✓ / ~</div>
+        <div class="feat-title">Calidad de datos</div>
+        <div class="feat-desc">Cada dato está etiquetado como "real" (scrapeado directamente) o "estimado" (fallback por protección anti-bot).</div>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">↓</div>
+        <div class="feat-title">Exportación</div>
+        <div class="feat-desc">Exportá cualquier resultado en CSV (con BOM para Excel) o JSON estructurado con todos los campos disponibles.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLATAFORMAS -->
+  <section>
+    <div class="section-badge">Cobertura</div>
+    <h2>Plataformas monitoreadas</h2>
+    <p>Scrapers dedicados con lógica específica para cada plataforma, incluyendo fallback sintético realista cuando el anti-bot bloquea.</p>
+    <div class="plat-grid">
+      <div class="plat"><div class="plat-dot" style="background:#fcd34d"></div><div><div class="plat-name">MercadoLibre</div><div class="plat-tag">Argentina · scraping directo</div></div></div>
+      <div class="plat"><div class="plat-dot" style="background:#34d399"></div><div><div class="plat-name">Amazon</div><div class="plat-tag">USA · scraping directo</div></div></div>
+      <div class="plat"><div class="plat-dot" style="background:#93c5fd"></div><div><div class="plat-name">eBay</div><div class="plat-tag">Global · scraping directo</div></div></div>
+      <div class="plat"><div class="plat-dot" style="background:#fb923c"></div><div><div class="plat-name">AliExpress</div><div class="plat-tag">China · JSON + HTML</div></div></div>
+      <div class="plat"><div class="plat-dot" style="background:#fca5a5"></div><div><div class="plat-name">Temu</div><div class="plat-tag">Global · HTML + fallback</div></div></div>
+      <div class="plat"><div class="plat-dot" style="background:#f9a8d4"></div><div><div class="plat-name">Shein</div><div class="plat-tag">Moda · HTML + fallback</div></div></div>
+      <div class="plat"><div class="plat-dot" style="background:#86efac"></div><div><div class="plat-name">TiendaMia</div><div class="plat-tag">Latam · HTML + fallback</div></div></div>
+      <div class="plat"><div class="plat-dot" style="background:#a78bfa"></div><div><div class="plat-name">Web (DDG/Google/Bing)</div><div class="plat-tag">Cualquier tienda online</div></div></div>
+    </div>
+  </section>
+
+  <!-- SCORING -->
+  <section>
+    <div class="section-badge">Algoritmo</div>
+    <h2>Cómo se calcula el Score</h2>
+    <p>El <strong>Score inteligente</strong> es un índice de popularidad/valor (0–100). El <strong>Trend Score</strong> es un índice de oportunidad de mercado (0–100). Son dos métricas diferentes y complementarias.</p>
+    <div class="score-formula">
+      <span class="c3">// Score inteligente (popularidad)</span><br>
+      Score = <span class="c1">ventas_norm</span> × 0.40<br>
+            + <span class="c1">rating_norm</span> × 0.30<br>
+            + <span class="c1">reseñas_norm</span> × 0.20<br>
+            + <span class="c1">precio_competitivo</span> × 0.10<br><br>
+      <span class="c3">// Trend Score (oportunidad)</span><br>
+      TrendScore = <span class="c2">sales_velocity</span> × 0.30<br>
+                 + <span class="c2">review_growth</span> × 0.25<br>
+                 + <span class="c2">search_demand</span> × 0.20<br>
+                 + <span class="c2">price_spread</span> × 0.15<br>
+                 + <span class="c2">margin_score</span> × 0.10
+    </div>
+  </section>
+
+  <!-- LIMITACIONES -->
+  <section>
+    <div class="section-badge">Transparencia</div>
+    <h2>Limitaciones conocidas</h2>
+    <ul class="limit-list">
+      <li><span class="icon">⚠️</span><span class="ltext"><strong style="color:var(--text)">Anti-bot:</strong> Temu y Shein bloquean scrapers agresivamente. Cuando ocurre, el sistema usa datos sintéticos realistas marcados como "estimado". Las URLs en estos casos apuntan a la búsqueda del producto, no al listing exacto.</span></li>
+      <li><span class="icon">📊</span><span class="ltext"><strong style="color:var(--text)">Reseñas de listado vs. producto:</strong> Los scrapers extraen el conteo de reseñas del listado de búsqueda. La página del producto puede mostrar un número diferente (más exacto). Esto es una limitación del scraping de resultados.</span></li>
+      <li><span class="icon">💱</span><span class="ltext"><strong style="color:var(--text)">Conversión de moneda:</strong> Los precios en ARS se convierten a USD con un tipo de cambio fijo (~1050). Este valor puede estar desactualizado y debe tomarse como referencia, no como cotización oficial.</span></li>
+      <li><span class="icon">🌐</span><span class="ltext"><strong style="color:var(--text)">Búsqueda web:</strong> Los precios extraídos de snippets de Google/Bing son aproximados. El scraper intenta parsear el precio del texto del snippet, que puede estar incompleto o ser el precio "desde".</span></li>
+      <li><span class="icon">📈</span><span class="ltext"><strong style="color:var(--text)">Trend Score:</strong> Las métricas de crecimiento son simuladas (no hay histórico real). En producción, requeriría un job de scraping periódico guardando snapshots en base de datos.</span></li>
+    </ul>
+  </section>
+
+  <!-- ROADMAP -->
+  <section>
+    <div class="section-badge">Roadmap</div>
+    <h2>Qué viene después</h2>
+    <div class="roadmap">
+      <div class="rm-col">
+        <div class="rm-head now">✓ Disponible ahora</div>
+        <div class="rm-item">Ranking general multi-plataforma</div>
+        <div class="rm-item">Búsqueda de producto específico</div>
+        <div class="rm-item">Web search (Google/DDG/Bing)</div>
+        <div class="rm-item">Trend Score + Oportunidades</div>
+        <div class="rm-item">Export CSV / JSON</div>
+        <div class="rm-item">Badge de calidad de datos</div>
+      </div>
+      <div class="rm-col">
+        <div class="rm-head soon">→ Próximamente</div>
+        <div class="rm-item">Watchlist con alertas de precio</div>
+        <div class="rm-item">Histórico de precios (sparklines)</div>
+        <div class="rm-item">Matching por embeddings (NLP)</div>
+        <div class="rm-item">Selenium headless opcional</div>
+        <div class="rm-item">API REST pública</div>
+        <div class="rm-item">Scheduling automático</div>
+      </div>
+      <div class="rm-col">
+        <div class="rm-head future">◌ Futuro</div>
+        <div class="rm-item">Dashboard de métricas históricas</div>
+        <div class="rm-item">Integración con Google Sheets</div>
+        <div class="rm-item">Notificaciones por email/Telegram</div>
+        <div class="rm-item">Modelo ML de predicción de precios</div>
+        <div class="rm-item">Multi-usuario con perfiles</div>
+        <div class="rm-item">Plugin de browser</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <p>Price Scout Bot · Herramienta open-source de inteligencia de precios · Corré localmente con Python + Flask</p>
+</footer>
+
+</body>
+</html>
