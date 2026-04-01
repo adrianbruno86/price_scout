@@ -26,7 +26,7 @@ body{font-family:'Space Grotesk',system-ui,sans-serif;background:var(--bg);color
 
 .page{display:none;}
 .page.active{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 91px);}
-.page.full{display:block!important;}
+.page.about-page{display:block;}
 @media(max-width:820px){.page.active{grid-template-columns:1fr;}}
 
 .sb{border-right:1px solid var(--bd);padding:1.1rem;overflow-y:auto;max-height:calc(100vh - 91px);position:sticky;top:91px;}
@@ -189,7 +189,11 @@ tr:hover .score-breakdown{display:block;}
 .state-text{font-size:13px;text-align:center;line-height:1.6;}
 .spinner{width:24px;height:24px;border:2px solid var(--bd);border-top-color:var(--ac);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:#2a0f0f;border:1px solid #5a1a1a;color:var(--danger);padding:10px 15px;border-radius:var(--r);font-size:12px;max-width:300px;z-index:999;display:none;}
+.toast{position:fixed;bottom:4rem;right:1.5rem;background:#2a0f0f;border:1px solid #5a1a1a;color:var(--danger);padding:10px 15px;border-radius:var(--r);font-size:12px;max-width:300px;z-index:999;display:none;}
+.site-footer{border-top:1px solid var(--bd);padding:12px 1.5rem;display:flex;align-items:center;justify-content:center;gap:1.5rem;background:var(--bg);position:sticky;bottom:0;z-index:50;}
+.site-footer span{font-size:11px;color:var(--mu);}
+.site-footer a{font-size:11px;color:var(--mu);text-decoration:none;}
+.site-footer a:hover{color:var(--tx);}
 </style>
 </head>
 <body>
@@ -457,7 +461,7 @@ tr:hover .score-breakdown{display:block;}
 </div>
 
 <!-- ══════════════════ TAB 4: ABOUT ══════════════════ -->
-<div class="page full" id="page-about" style="display:none;">
+<div class="page" id="page-about">
   <div class="about-wrap">
     <div class="about-hero">
       <h1>Inteligencia de precios para el<br><span>e-commerce moderno</span></h1>
@@ -560,17 +564,30 @@ tr:hover .score-breakdown{display:block;}
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<footer class="site-footer">
+  <span>© 2026 <strong style="color:var(--tx)">Adrian Bruno</strong> · Price Scout Bot</span>
+  <span>·</span>
+  <a href="/about" target="_blank">Sobre esta web</a>
+  <span>·</span>
+  <span>Python + Flask · Scraping en tiempo real</span>
+</footer>
 
-<script>
+<div class="toast" id="toast"></div>
+</body>
+</html>
 const DATA={r:[],c:[],o:[]}, LAST={r:'',c:'',o:''};
 
 function sw(id){
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['ranking','compare','opp','about'][i]===id));
-  document.querySelectorAll('.page').forEach(p=>{p.style.display='none';p.classList.remove('active');});
+  document.querySelectorAll('.page').forEach(p=>{
+    p.classList.remove('active','about-page');
+  });
   const pg=document.getElementById('page-'+id);
-  if(id==='about'){pg.style.display='block';}
-  else{pg.style.display='';pg.classList.add('active');}
+  if(id==='about'){
+    pg.classList.add('about-page');
+  } else {
+    pg.classList.add('active');
+  }
 }
 
 function tc(el){el.classList.toggle('on');}
@@ -743,5 +760,3 @@ document.getElementById('c-webonly').addEventListener('change',function(){
   document.getElementById('c-chips').style.pointerEvents=this.checked?'none':'auto';
 });
 </script>
-</body>
-</html>

@@ -124,3 +124,49 @@ price_scout/
     ├── shein.py
     └── tiendanube.py
 ```
+
+---
+
+## Búsqueda web (Google / DDG / Bing) — Diagnóstico
+
+La búsqueda web raspa los motores de búsqueda en tiempo real.
+Si aparece "Sin resultados" en la sección Producto Específico, seguí estos pasos:
+
+### Paso 1 — Verificar conectividad
+```bash
+python3 -c "import socket; print(socket.gethostbyname('duckduckgo.com'))"
+# Si falla con "Name resolution" → problema de red/DNS en tu entorno
+```
+
+### Paso 2 — Test manual del scraper
+```bash
+cd price_scout
+python3 -m scrapers.websearch "JBL Go 3"
+# Debería mostrar resultados de DDG / Google / Bing
+```
+
+### Paso 3 — Si sigue sin funcionar: SerpAPI (recomendado)
+
+SerpAPI ofrece **100 búsquedas gratis por mes** y es la opción más confiable:
+
+1. Registrarte en https://serpapi.com/ (gratis)
+2. Copiar tu API key
+3. Configurar la variable de entorno:
+   ```bash
+   # Linux/Mac
+   export SERPAPI_KEY="tu_key_aqui"
+   python3 app.py
+
+   # Windows
+   set SERPAPI_KEY=tu_key_aqui
+   python3 app.py
+   ```
+
+Con SerpAPI configurado, la búsqueda web usa su API en lugar de scraping directo,
+lo que garantiza resultados en cualquier entorno.
+
+### Por qué puede fallar sin SerpAPI
+- **IP bloqueada**: Google/DDG bloquean IPs que hacen muchas requests
+- **VPN/proxy**: Algunos proveedores tienen IPs en listas negras de buscadores
+- **Rate limiting**: Demasiadas búsquedas en poco tiempo
+- **CAPTCHA**: Google puede exigir verificación humana
